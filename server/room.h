@@ -2,8 +2,8 @@
 #define room
 typedef struct Client {
     int connfd;
-    int *roomClients;
     char username[15];
+    int *roomClients;
 } Client;
 
 Client *createClient(int connfd);

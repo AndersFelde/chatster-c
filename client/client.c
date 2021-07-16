@@ -19,11 +19,11 @@ void *listenForMsg(void *_sockfd) {
     int n = 0;
     int sockfd = (int)_sockfd;
     while ((n = read(sockfd, recvBuff, sizeof(recvBuff) - 1)) > 0) {
-        recvBuff[n] = 0;
+        // recvBuff[n] = 0x00;
+        strncat(recvBuff, "\nok> ", sizeof(recvBuff) - strlen(recvBuff));
         if (fputs(recvBuff, stdout) == EOF) {
             printf("\n Error : Fputs error");
         }
-        printf("\n >");
     }
     if (n < 0) {
         printf("\n Read Error \n");
@@ -53,11 +53,11 @@ int main(void) {
         return 1;
     }
 
-    pthread_t newThread;
-    pthread_create(&newThread, NULL, listenForMsg, (void *)sockfd);
+    pthread_t listenThread;
+    pthread_create(&listenThread, NULL, listenForMsg, (void *)sockfd);
 
-    printf("> ");
-    fgets(typedMsg, BUFFER_SIZE, stdin);
+    printf("Username: ");
+    fgets(typedMsg, BUFFER_SIZE, stdin);  // username
     while (strcmp(typedMsg, "quit\n") != 0) {
         send(sockfd, typedMsg, strlen(typedMsg) - 1, 0);
         printf("> ");
@@ -65,6 +65,7 @@ int main(void) {
     }
     close(sockfd);
     printf("Closed socket");
+    pthread_cancel(listenThread);
     pthread_exit(NULL);
 
     return 0;

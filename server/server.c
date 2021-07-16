@@ -13,17 +13,28 @@
 
 #define BUFFER_SIZE 128
 
-char *message = "Welcome";
 char typedMsg[BUFFER_SIZE];
 char recvBuff[1024];
+char writeBuff[1024];
 
 void *handleClient(void *_connfd) {
-    // Client *client;
     int connfd = (int)_connfd;
-
-    // client = createClient(connfd);
+    Client client = {connfd};
 
     int n = 0;
+    n = read(connfd, recvBuff, sizeof(recvBuff) - 1);
+    if (n > 0) {
+        recvBuff[n] = 0;
+        strncpy(client.username, recvBuff, sizeof(client.username));
+    }
+    printf("%s joined \n", client.username);
+
+    strncpy(writeBuff, "Welcome ", sizeof(writeBuff));
+    strncat(writeBuff, client.username,
+            sizeof(writeBuff) - strlen(writeBuff) - 1);
+
+    write(connfd, writeBuff, strlen(writeBuff) + 1);
+
     while ((n = read(connfd, recvBuff, sizeof(recvBuff) - 1)) > 0) {
         recvBuff[n] = 0;
         printf("%s", recvBuff);
@@ -35,6 +46,8 @@ void *handleClient(void *_connfd) {
     if (n < 0) {
         printf("\n Read Error \n");
     }
+    close(connfd);
+    printf("%s left \n", client.username);
     pthread_exit(NULL);
 }
 
@@ -71,7 +84,12 @@ int main(void) {
     serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
     serv_addr.sin_port = htons(6969);
 
-    bind(listenfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr));
+    int e = bind(listenfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr));
+    if (e < 0) {
+        printf("Failed to bind\n");
+        return -1;
+    }
+
     printf("socket binded on: %d\n", serv_addr.sin_port);
 
     if (listen(listenfd, 10) == -1) {
