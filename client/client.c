@@ -32,7 +32,7 @@ void *listenForMsg(void *_sockfd) {
 }
 
 int main(void) {
-    int sockfd = 0, n = 0;
+    int sockfd = 0;
     struct sockaddr_in serv_addr;
 
     memset(recvBuff, '0', sizeof(recvBuff));
@@ -44,6 +44,8 @@ int main(void) {
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_port = htons(6969);
     serv_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
+
+    printf("Connecting on: %d\n", serv_addr.sin_port);
     int conn =
         connect(sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr));
     if (conn < 0) {
@@ -62,6 +64,7 @@ int main(void) {
         fgets(typedMsg, BUFFER_SIZE, stdin);
     }
     close(sockfd);
+    printf("Closed socket");
     pthread_exit(NULL);
 
     return 0;
