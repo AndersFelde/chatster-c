@@ -19,8 +19,8 @@ void *listenForMsg(void *_sockfd) {
     int n = 0;
     int sockfd = (int)_sockfd;
     while ((n = read(sockfd, recvBuff, sizeof(recvBuff) - 1)) > 0) {
-        // recvBuff[n] = 0x00;
-        strncat(recvBuff, "\nok> ", sizeof(recvBuff) - strlen(recvBuff));
+        recvBuff[n] = 0x00;
+        // strncat(recvBuff, "\nok> ", sizeof(recvBuff) - strlen(recvBuff));
         if (fputs(recvBuff, stdout) == EOF) {
             printf("\n Error : Fputs error");
         }
@@ -57,7 +57,9 @@ int main(void) {
     pthread_create(&listenThread, NULL, listenForMsg, (void *)sockfd);
 
     printf("Username: ");
-    fgets(typedMsg, BUFFER_SIZE, stdin);  // username
+    /* fgets(typedMsg, BUFFER_SIZE, stdin);  // username
+    send(sockfd, typedMsg, strlen(typedMsg) - 1, 0);
+    printf("RoomId: "); */
     while (strcmp(typedMsg, "quit\n") != 0) {
         send(sockfd, typedMsg, strlen(typedMsg) - 1, 0);
         printf("> ");
